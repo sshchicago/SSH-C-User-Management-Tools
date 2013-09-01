@@ -70,6 +70,30 @@ class sshcldap:
              return True
          return False
 
+    def find_user(self, uid):
+        """
+        Finds a user with the matching uid. Returns some information about that
+        user.
+        """
+        r = self.__lconn.search_s(self.BASEDN, ldap.SCOPE_SUBTREE, '(uid=*%s*)' % uid, ['mail','cn'])
+        return r
+
+    def is_user_active(self, uid):
+        """
+        Returns if a user is active, or inacitve.
+        """
+        # The active/inactive stuff is very much a 389 extension. 
+        # nsAccountLock = True when an account is inactive. 
+        # If it's false, or the attrib doesn't exist at all, the acount is active.
+        r = self.__lconn.search_s(self.BASEDN, ldap.SCOPE_SUBTREE, '(uid=*%s*)' % uid, ['nsAccountLock'])
+        try:
+            return not(bool(r[0][1]['nsAccountLock']))
+        except KeyError:
+            # Expected if the account is active.
+            pass
+
+        return True
+
     def create_user(self, givenName, sn, mail, uid=None, password=None):
          """
          Creates a user under basedn. If not specified, uid will be 
