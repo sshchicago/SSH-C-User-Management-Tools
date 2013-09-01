@@ -29,14 +29,18 @@ class sshcldap:
 
     __lconn = None
 
-    def __init__(self, uid, password, url, basedn=None):
+     def __init__(self, uid, password, url=None, basedn=None):
         """
         Initializes the connection using uid and password. 
         A fully qualified cn is constructed by combining uid and basedn.
         """
         if (basedn != None):
-            self.basedn = basedn
+            self.BASEDN = basedn
+        if (url != None):
+            self.URL = url
 
+        self.__lconn = ldap.initialize(self.URL)
+        self.__lconn.simple_bind_s(self.__fquid(uid), password)
 
      def __delete__(self):
          """
@@ -47,6 +51,24 @@ class sshcldap:
          except:
              # Eh, who cares.
              pass
+
+     def __fquid(self, uid):
+         """
+         Returns the fully-qualified dn of a uid.
+         """
+         return "uid=%s,ou=people,%s" % (uid, self.BASEDN)
+
+     def is_connection_valid(self):
+         """
+         Checks if the LDAP bind is working. Returns true/false.
+         """
+         # Ideally, we'd use python-ldap's whoami_s() to see who we are and if we've
+         # bound, but 389 doesn't implement RFC 4532. In that case, we're
+         # going to do a search, and if we get more than 1 result, consider it good.
+         r = __lconn.search_s(self.BASEDN, ldap.SCOP_SUBTREE, '(cn=*)',['mail'])
+         if (len(r) > 1):
+             return True
+         return False
 
      def create_user(self, givenName, sn, mail, uid=None, password=None):
          """
