@@ -14,6 +14,8 @@ __email__ = "chris@chrisswingler.com"
 __status__ = "Development"
 
 import ldap
+import string
+import random
 
 class sshcldap:
     """
@@ -58,6 +60,16 @@ class sshcldap:
          """
          return "uid=%s,ou=people,%s" % (uid, self.BASEDN)
 
+    def __genPass(self):
+        """
+        Generates a string of random characters to be used as
+        a (temporary) password.
+        """
+        characters = string.ascii_letters + string.punctuation  + string.digits
+        password =  "".join(random.choice(characters) for x in range(random.randint(8, 16)))
+        return password
+
+
     def is_connection_valid(self):
          """
          Checks if the LDAP bind is working. Returns true/false.
@@ -90,7 +102,7 @@ class sshcldap:
             return not(bool(r[0][1]['nsAccountLock']))
         except KeyError:
             # Expected if the account is active.
-            pass
+            return True
 
         return True
 
@@ -100,22 +112,40 @@ class sshcldap:
          the first letter of givenName + sn (lower case), and
          password will be randomly generated.
 
-         Retruns a tuple containing (uid, password); password in cleartext.
+         Returns a tuple containing (uid, password); password in cleartext.
          """
-         pass
+         if (uid == None):
+             # Create the UID
+             uid = "%s%s" % (givenName.lower()[0], sn.lower())
+
+         if (password == None):
+             password = self.__genPass()
+
+         addDn = "uid=%s,ou=People,%s" % (uid, self.BASEDN)
+         addModList = [('userPassword', password), \
+                       ('mail', mail), ("sn", sn), ("givenname",givenName), ("cn", "%s %s" % (givenName, sn)), \
+                       ("objectclass","top"),("objectclass","person"),("objectclass","inetorgperson")]
+         self.__lconn.add_s(addDn, addModList)
+         return (uid, password)
 
     def delete_user(self, uid):
          """
          Deletes a user. Should not be used much, in favor of deactivate_user.
          """
-         pass
+         self.__lconn.delete_s("uid=%s,ou=People,%s" % (uid, self.BASEDN))
 
     def deactivate_user(self, uid):
          """
          Deactivates a user; preventing them from logging in. Leaves the entry
          in the database.
          """
-         pass
+         self.__lconn.modify_ext_s("uid=%s,ou=People,%s" % (uid, self.BASEDN), [(ldap.MOD_ADD,'nsAccountLock',"True")])
+
+    def activate_user(self, uid):
+        """
+        Activates a user (by deleting the related attribute).
+        """
+        self.__lconn.modify_ext_s("uid=%s,ou=People,%s" % (uid, self.BASEDN), [(ldap.MOD_DELETE,'nsAccountLock',None)])
 
     def add_to_groups(self, uid, groups):
          """
