@@ -1,0 +1,25 @@
+Hello %FIRSTNAME% %LASTNAME%!
+
+This is a notification that you have been created an account on the South Side Hackerspace Chicago LDAP server.
+
+Currently, this account is used exclusively for use on our Wiki, though it will in the future be used for all other IT services.
+
+== LOGIN INFO: ==
+Your account credentials are as follows:
+
+Username: %USERNAME%
+Password: %PASSWORD%
+
+Please change your password as soon as possible. Changing your password is accomplished by visiting the ssh:chicago Wiki, logging in, and clicking "Change Password" in your Preferences.
+
+Direct link to change your password: http://wiki.sshchicago.org/index.php?title=Special:ChangePassword&returnto=Special%3APreferences
+
+== WIKI INFORMATION: ==
+Wiki link: http://wiki.sshchicago.org
+
+== NOTE ABOUT YOUR USERNAME == 
+If you do not like your username ("%USERNAME%"), please reply to this email as soon as possible! We're more than willing to change it to anything that's not currently used, but be aware that we may choose to reject certain usernames based on whatever arbitrary rules strike our fancy.
+
+Thanks!
+
+-- Your friendly ssh:c IT staff.
