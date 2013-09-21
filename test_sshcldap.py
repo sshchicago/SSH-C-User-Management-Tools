@@ -88,6 +88,10 @@ class ldapUnitTests(unittest.TestCase):
         self.__createdUid = newUid
         print "__createdUid: %s" % self.__createdUid
       
+    def testCreateUserAddToGroup(self):
+        # Adds the new user to the standard groups.
+        self.failIf(l.set_officer_user_groups(generatedUid))
+
     def testDeactivateUser(self):
         print "__createdUid: %s" % generatedUid
 
@@ -97,11 +101,17 @@ class ldapUnitTests(unittest.TestCase):
     def testReactivateUser(self):
         l.activate_user(generatedUid)
         self.failUnless(l.is_user_active(generatedUid))
-    
-    def testZDeleteUser(self):
-        l.delete_user(generatedUid)
-        self.failUnless(l.is_user_active(uid))
 
+    def testZChangePassword(self):
+        newPass = l.reset_password(generatedUid)
+        self.failUnless(type(newPass) == str)
+        print "New password for %s is %s" % (generatedUid, newPass)
+         
+    
+#    def testZDeleteUser(self):
+#        l.delete_user(generatedUid)
+#        self.failUnless(l.is_user_active(uid))
+#
 #     def deleteUser(self):
 #         # Delets a user, checks if the user is now gone.
 #         pass

@@ -25,9 +25,9 @@ class sshcldap:
     BASEDN="dc=sshchicago,dc=org"
     URL="ldap://dir.sshchicago.org:389"
 
-    STANDARD_USER_GROUPS=[('cn','SSHC Members')]
-    ADMIN_USER_GROUPS=[('cn','Administrative Members')] + STANDARD_USER_GROUPS
-    OFFICER_USER_GROUPS=[('cn','Officers')] + ADMIN_USER_GROUPS
+    STANDARD_USER_GROUPS=['SSHC Members']
+    ADMIN_USER_GROUPS=['Administrative Members'] + STANDARD_USER_GROUPS
+    OFFICER_USER_GROUPS=['Officers'] + ADMIN_USER_GROUPS
 
     __lconn = None
 
@@ -153,7 +153,6 @@ class sshcldap:
          """
          fquid = "uid=%s,ou=People,%s" % (uid, self.BASEDN)
          fqgrpid = "cn=%s,ou=Groups,%s" % (group, self.BASEDN)
-         #self.__lconn.modify_ext_s("uid=%s,ou=People,%s" % (uid, self.BASEDN), [ldap.MOD_ADD, '
          self.__lconn.modify_ext_s(fqgrpid, [(ldap.MOD_ADD,'uniqueMember',fquid)])
 
     def add_to_groups(self, uid, groups):
@@ -188,4 +187,7 @@ class sshcldap:
         """
         Sets the password of uid to a random value. Returns a tuple of uid, new password. 
         """
-        pass
+        newpass = self.__genPass()
+        #self.__lconn.passwd_s(user="uid=%s,ou=People,%s" % (uid, self.BASEDN), oldpw=None, newpw=newpass)
+        self.__lconn.modify_ext_s("uid=%s,ou=People,%s" % (uid, self.BASEDN), [(ldap.MOD_REPLACE,'userPassword',newpass)])
+        return newpass
