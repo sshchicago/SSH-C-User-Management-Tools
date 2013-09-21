@@ -147,34 +147,45 @@ class sshcldap:
         """
         self.__lconn.modify_ext_s("uid=%s,ou=People,%s" % (uid, self.BASEDN), [(ldap.MOD_DELETE,'nsAccountLock',None)])
 
+    def add_to_group(self, uid, group):
+         """
+         Adds the uid to a single group.
+         """
+         fquid = "uid=%s,ou=People,%s" % (uid, self.BASEDN)
+         fqgrpid = "cn=%s,ou=Groups,%s" % (group, self.BASEDN)
+         #self.__lconn.modify_ext_s("uid=%s,ou=People,%s" % (uid, self.BASEDN), [ldap.MOD_ADD, '
+         self.__lconn.modify_ext_s(fqgrpid, [(ldap.MOD_ADD,'uniqueMember',fquid)])
+
     def add_to_groups(self, uid, groups):
-         """
-         Adds the uid to the list of groups.
-         """
-         pass
+        """
+        Adds a UID to the list of groups in group.
+        """
+        for group in groups:
+            self.add_to_group(uid, group)
 
     def set_standard_user_groups(self, uid):
          """
          Adds the uid to the list of standard groups defined by 
          STANDARD_USER_GROUPS
          """
-         pass
+         self.add_to_groups(uid, self.STANDARD_USER_GROUPS)
 
     def set_admin_user_groups(self, uid):
         """
         Adds the uid to the list of groups defined by
         ADMIN_USER_GROUPS
         """
-        pass
+        self.add_to_groups(uid, self.ADMIN_USER_GROUPS)
 
     def set_officer_user_groups(self, uid):
         """
         Adds the uid to the list of groups defined by
         OFFICER_USER_GROUPS
         """
-        pass
+        self.add_to_groups(uid, self.OFFICER_USER_GROUPS)
 
     def reset_password(self, uid):
         """
         Sets the password of uid to a random value. Returns a tuple of uid, new password. 
         """
+        pass
