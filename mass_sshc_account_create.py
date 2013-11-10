@@ -59,11 +59,13 @@ class ldap_account_manager:
         """
         pass
 
-    def deactiavte_user(self, uid, doEmail = false, specialReason = None):
+    def deactivate_user(self, uid, doEmail = false, specialReason = None):
         """
         Deactivates an existing user. 
         Sends out an email to tell them that their account has been deactivated
         if doEmail = True, and allows a special reason to be attached by passing specialReason
+        Returns true if a deactivation worked. Returns false if the user is already deactivated.
+        Skips doEmail if activation state doesn't change.
         """
         pass
 
@@ -72,6 +74,8 @@ class ldap_account_manager:
         Reactivates a previously deactivated user.
         Sends out an email to tell them that their account has been reactivated
         if doEmail = True, and allows for a reason.
+        Returns true if an activation worked. Returns false if the user is already active
+        Skips doWmail if activation state hasn't changed.
         """
         pass
 
