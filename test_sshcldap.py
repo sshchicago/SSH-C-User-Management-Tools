@@ -102,6 +102,11 @@ class ldapUnitTests(unittest.TestCase):
         l.activate_user(generatedUid)
         self.failUnless(l.is_user_active(generatedUid))
 
+    def testZAlistAllUsers(self):
+        people = l.list_people()
+        print(str(people))
+        self.failUnless(len(people) > 0)
+
     def testZChangePassword(self):
         newPass = l.reset_password(generatedUid)
         self.failUnless(type(newPass) == str)
