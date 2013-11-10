@@ -191,3 +191,10 @@ class sshcldap:
         #self.__lconn.passwd_s(user="uid=%s,ou=People,%s" % (uid, self.BASEDN), oldpw=None, newpw=newpass)
         self.__lconn.modify_ext_s("uid=%s,ou=People,%s" % (uid, self.BASEDN), [(ldap.MOD_REPLACE,'userPassword',newpass)])
         return newpass
+
+    def list_people(self):
+        """
+        Returns a list of all members of the ou=People ou.
+        """
+        people = self.__lconn.search_s("ou=People,dc=sshchicago,dc=org", scope=ldap.SCOPE_SUBTREE, filterstr='(objectClass=person)')
+        return people
