@@ -25,8 +25,10 @@ class sshcldap:
     BASEDN="dc=sshchicago,dc=org"
     URL="ldap://dir.sshchicago.org:389"
 
+
     STANDARD_USER_GROUPS=['SSHC Members']
-    ADMIN_USER_GROUPS=['Administrative Members'] + STANDARD_USER_GROUPS
+    PROTECTED_USER_GROUPS=['Deactivation Protected Users'] + STANDARD_USER_GROUPS
+    ADMIN_USER_GROUPS=['Administrative Members'] + PROTECTED_USER_GROUPS
     OFFICER_USER_GROUPS=['Officers'] + ADMIN_USER_GROUPS
 
     __lconn = None
@@ -89,6 +91,14 @@ class sshcldap:
         """
         r = self.__lconn.search_s(self.BASEDN, ldap.SCOPE_SUBTREE, '(uid=*%s*)' % uid, ['mail','cn'])
         return r
+
+    def find_user_by_email(self, email):
+        """
+        Finds a user with the matching email address (case knocked down).
+        Returns true if they exist, false otherwise.
+        """
+        result = self.__lconn.search_s(self.BASEDN, ldap.SCOPE_SUBTREE, '(mail=%s)' % email, ['mail','cn'])
+        return (len(result) > 0)
 
     def is_user_active(self, uid):
         """
@@ -185,7 +195,7 @@ class sshcldap:
 
     def reset_password(self, uid):
         """
-        Sets the password of uid to a random value. Returns a tuple of uid, new password. 
+        Sets the password of uid to a random value. Returns new password. 
         """
         newpass = self.__genPass()
         #self.__lconn.passwd_s(user="uid=%s,ou=People,%s" % (uid, self.BASEDN), oldpw=None, newpw=newpass)
@@ -196,5 +206,14 @@ class sshcldap:
         """
         Returns a list of all members of the ou=People ou.
         """
-        people = self.__lconn.search_s("ou=People,dc=sshchicago,dc=org", scope=ldap.SCOPE_SUBTREE, filterstr='(objectClass=person)')
+        people = self.__lconn.search_s("ou=People,%s" % (self.BASEDN), scope=ldap.SCOPE_SUBTREE, filterstr='(objectClass=person)')
         return people
+
+    def is_member_of_group(self, uid, groupCn):
+        """
+        Returns true if uid is a member of groupCn,
+        otherwise return false.
+        """
+        # XXX: Implement this!
+        raise NotImplementedError
+

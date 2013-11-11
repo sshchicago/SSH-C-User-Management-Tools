@@ -15,6 +15,7 @@ import unittest
 from ConfigParser import RawConfigParser as cparser
 import sshcldap
 import string
+from pprint import pprint as pp
 
 config = cparser()
 config.read('ldapcreds.cfg')
@@ -104,7 +105,7 @@ class ldapUnitTests(unittest.TestCase):
 
     def testZAlistAllUsers(self):
         people = l.list_people()
-        print(str(people))
+        pp(people)
         self.failUnless(len(people) > 0)
 
     def testZChangePassword(self):
