@@ -16,6 +16,14 @@ __status__ = "Development"
 import ldap
 import string
 import random
+import logging
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+
+logger.addHandler(ch)
 
 class sshcldap:
     """
@@ -108,6 +116,7 @@ class sshcldap:
         # nsAccountLock = True when an account is inactive. 
         # If it's false, or the attrib doesn't exist at all, the acount is active.
         r = self.__lconn.search_s(self.BASEDN, ldap.SCOPE_SUBTREE, '(uid=*%s*)' % uid, ['nsAccountLock'])
+        logger.debug("%s's nsAccountLock is %s" % (uid, r))
         try:
             return not(bool(r[0][1]['nsAccountLock']))
         except KeyError:
@@ -206,7 +215,10 @@ class sshcldap:
         """
         Returns a list of all members of the ou=People ou.
         """
+        logger.debug("Going to search (\"ou=People,%s\", scope=ldap.SCOPE_SUBTREE, filterstr='(objectClass=person)'" % self.BASEDN)
         people = self.__lconn.search_s("ou=People,%s" % (self.BASEDN), scope=ldap.SCOPE_SUBTREE, filterstr='(objectClass=person)')
+        logger.debug("People is %s | %s | %s" % (type(people), len(people), people))
+        logger.debug("People contains %s members" % len(people))
         return people
 
     def is_member_of_group(self, uid, groupCn):
@@ -214,6 +226,18 @@ class sshcldap:
         Returns true if uid is a member of groupCn,
         otherwise return false.
         """
-        # XXX: Implement this!
-        raise NotImplementedError
+        if(type(uid) == list):
+            uid = uid[0]
+        uid = "uid=%s" % uid    
+        # (&(objectClass=groupOfUniqueNames)(cn~="Deactivation Protected Users,ou=Groups,dc=sshchicago,dc=org"))
+        groupItems = self.__lconn.search_s("ou=Groups,%s" % (self.BASEDN), scope=ldap.SCOPE_SUBTREE, filterstr='(&(objectClass=groupOfUniqueNames)(cn~=%s))' % groupCn)
+        logger.debug("Members of %s are: %s" % (groupCn, groupItems))
+        from pprint import pprint as pp
+        pp(groupItems)
+        for uniqueMember in groupItems[0][1]['uniqueMember']:
+            logger.debug("Testing if %s == %s" % (uid, uniqueMember))
+            if uniqueMember.find(uid) > -1:
+                logger.debug("Found %s in %s" % (uid, uniqueMember))
+                return True
 
+        return False
