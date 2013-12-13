@@ -2,7 +2,7 @@
 
 # A really hackish way to add LDAP members.
 # Takes a CSV with this format:
-# FullName, EmailAddress, Password (expects headers 
+# FullName, EmailAddress, Password
 # EmailAddress can be blank.
 # Outputs an LDIF to stdout that can then be used by ldapadd or ldapmodify:
 # ldapadd -x -D uid=username,ou=people,dc=sshchicago,dc=org -W -f
